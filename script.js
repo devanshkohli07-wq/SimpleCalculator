@@ -24,6 +24,19 @@ function runNumber (number) {
         display.textContent = numA;
     }
 }
+const numberButtons = document.querySelectorAll(".number");
+const operatorButtons = document.querySelectorAll(".operator");
+const clearAllButton = document.querySelector("#ac");
+const display = document.querySelector("#display");
+
+numberButtons.forEach((button) => {
+    button.addEventListener("click", () => runNumber(button.id));
+});
+
+operatorButtons.forEach((button) => {
+    button.addEventListener("click", () => runOperation(button.id));
+});
+
 function runOperation (symbol) {
     if (numA == null && numB == null) return;
 
