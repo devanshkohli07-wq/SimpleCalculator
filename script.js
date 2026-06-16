@@ -37,6 +37,37 @@ operatorButtons.forEach((button) => {
     button.addEventListener("click", () => runOperation(button.id));
 });
 
+clearAllButton.addEventListener("click", () => {
+    restart();
+    clearDisplay();
+});
+
+function runNumber (number) {
+    if (number == "negative") {
+        if (display.textContent == 0 || display.textContent == "") {
+            numA = "-0";
+            display.textContent = numA;
+            return;
+        }
+        return;
+    }
+    if (operator == "" || operator == "equals") {
+        if (numA == null) numA = 0;
+        numA = Number(`${numA}` + number);
+        display.textContent = numA;
+    }  else {
+        if (numB == null) numB = 0;
+        numB = Number(`${numB}` + number);
+        display.textContent = numB;
+        return;
+    }
+    if (numA != null && numB != null) {
+        restart();
+        if (numA == null) numA = 0;
+        numA = Number(`${numA}` + number);
+        display.textContent = numA;
+    }
+}
 function runOperation (symbol) {
     if (numA == null && numB == null) return;
 
