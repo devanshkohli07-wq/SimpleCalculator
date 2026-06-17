@@ -3,8 +3,9 @@ const operatorButtons = document.querySelectorAll(".operator");
 const clearAllButton = document.querySelector("#ac");
 const display = document.querySelector("#display");
 
-let numA = null;
-let numB = null;
+// Track numbers as strings for clean inline text concatenation
+let numA = "";
+let numB = "";
 let operator = "";
 let lastUsedOperator = "";
 
@@ -18,96 +19,110 @@ operatorButtons.forEach((button) => {
 
 clearAllButton.addEventListener("click", () => {
     restart();
-    clearDisplay();
-    display.textContent = "0"; // Reset visual display back to zero
+    display.textContent = "0"; // Default visual display reset
 });
+
+// Helper function to translate internal IDs into reader-friendly math symbols
+function getOperatorSymbol(op) {
+    if (op === "plus") return " + ";
+    if (op === "subtract") return " - ";
+    if (op === "multiply") return " × ";
+    if (op === "divide") return " ÷ ";
+    return "";
+}
+
+// Global update helper to keep the entire expression rendered dynamically
+function updateExpressionDisplay() {
+    let currentExpression = numA + getOperatorSymbol(operator) + numB;
+    display.textContent = currentExpression || "0";
+}
 
 function runNumber (number) {
     if (number === "negative") {
-        if (display.textContent === "0" || display.textContent === "") {
-            numA = "-0";
-            display.textContent = numA;
-            return;
+        if (operator === "" || operator === "equals") {
+            if (numA === "") numA = "0";
+            numA = numA.startsWith("-") ? numA.slice(1) : "-" + numA;
+        } else {
+            if (numB === "") numB = "0";
+            numB = numB.startsWith("-") ? numB.slice(1) : "-" + numB;
         }
+        updateExpressionDisplay();
         return;
     }
 
     if (operator === "" || operator === "equals") {
-        if (numA === null || numA === 0) numA = "";
-        numA = Number(`${numA}` + number);
-        display.textContent = numA;
+        if (operator === "equals") {
+            numA = "";
+            operator = "";
+        }
+        if (numA === "0" && number === "0") return;
+        if (numA === "0") numA = "";
+        
+        numA += number;
     } else {
-        if (numB === null || numB === 0) numB = "";
-        numB = Number(`${numB}` + number);
-        display.textContent = numB;
+        if (numB === "0" && number === "0") return;
+        if (numB === "0") numB = "";
+        
+        numB += number;
     }
+    updateExpressionDisplay();
 }
 
 function runOperation (symbol) {
-    if (numA === null && numB === null) return;
+    if (numA === "") return;
 
     if (symbol === "equals") {
-        // FIXED: Changed || to && so it properly filters out both values
-        if (numA !== null && numB !== null && operator !== "" && operator !== "equals") {
-            numA = operate(numA, numB, operator);
-            display.textContent = numA;
-        } else if (numA !== null && numB !== null && operator === "equals") {
-            numA = operate(numA, numB, lastUsedOperator);
-            display.textContent = numA;
-        } else if (numA !== null && operator !== "" && operator !== "equals") {
+        if (numA !== "" && numB !== "" && operator !== "" && operator !== "equals") {
+            let result = operate(Number(numA), Number(numB), operator);
+            display.textContent = result;
+            numA = String(result);
+            numB = "";
+            lastUsedOperator = operator;
+        } else if (numA !== "" && numB !== "" && operator === "equals") {
+            let result = operate(Number(numA), Number(numB), lastUsedOperator);
+            display.textContent = result;
+            numA = String(result);
+            numB = "";
+        } else if (numA !== "" && operator !== "" && operator !== "equals") {
             numB = numA;
-            numA = operate(numA, numB, operator);
-            display.textContent = numA;
+            let result = operate(Number(numA), Number(numB), operator);
+            display.textContent = result;
+            numA = String(result);
+            numB = "";
         } else {
             return;
         }
+        operator = "equals";
     } else {
-        if (numA !== null && numB !== null && operator !== "" && operator !== "equals") {
-            numA = operate(numA, numB, operator);
-            display.textContent = numA;
+        if (numA !== "" && numB !== "" && operator !== "" && operator !== "equals") {
+            let result = operate(Number(numA), Number(numB), operator);
+            numA = String(result);
+            numB = "";
         }
-        numB = null;
+        if (operator === "equals") {
+            operator = "";
+        }
+        operator = symbol;
+        updateExpressionDisplay();
     }
-    if (symbol !== "equals") lastUsedOperator = symbol;
-    operator = symbol;
-}
-
-function clearDisplay () {
-    display.textContent = '';
 }
 
 function restart () {
-    numA = null;
-    numB = null;
+    numA = "";
+    numB = "";
     operator = "";
     lastUsedOperator = "";
 }
 
 function add (a, b) { return a + b; }
-
-function subtract (a, b) {
-    return a - b;
-}
-
-function multiply (a, b) {
-    return a * b;
-}
-
-function divide (a, b) {
-    if (b == 0) return "No";
-    return a / b;
-}
+function subtract (a, b) { return a - b; }
+function multiply (a, b) { return a * b; }
+function divide (a, b) { return b === 0 ? "No" : a / b; }
 
 function operate (a, b, operator) {
-    if (operator == "plus") {
-        return add(a, b);
-    } else if (operator == "subtract") {
-        return subtract(a, b);
-    } else if (operator == "multiply") {
-        return multiply(a, b);
-    } else if (operator == "divide") {
-        return divide(a, b);
-    } else {
-        return "Could not calculate.";
-    }
+    if (operator === "plus") return add(a, b);
+    if (operator === "subtract") return subtract(a, b);
+    if (operator === "multiply") return multiply(a, b);
+    if (operator === "divide") return divide(a, b);
+    return "Could not calculate.";
 }
