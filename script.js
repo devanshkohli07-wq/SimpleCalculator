@@ -38,16 +38,18 @@ function updateExpressionDisplay() {
 }
 
 function runNumber (number) {
-    if (number === "negative") {
-        if (operator === "" || operator === "equals") {
-            if (numA === "") numA = "0";
-            numA = numA.startsWith("-") ? numA.slice(1) : "-" + numA;
+if (number == "negative") {
+        if (operator == "" || operator == "equals") {
+            // If numA doesn't exist yet, make it 0 so we can flip it
+            if (numA == null) numA = 0; 
+            numA = numA * -1; // Toggle between positive and negative
+            display.textContent = numA;
         } else {
-            if (numB === "") numB = "0";
-            numB = numB.startsWith("-") ? numB.slice(1) : "-" + numB;
+            if (numB == null) numB = 0;
+            numB = numB * -1; // Toggle numB if we are working on the second number
+            display.textContent = numB;
         }
-        updateExpressionDisplay();
-        return;
+        return; // Exit the function so it doesn't try to append text
     }
 
     if (operator === "" || operator === "equals") {
